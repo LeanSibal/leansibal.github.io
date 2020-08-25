@@ -1,1 +1,192 @@
-Hello World
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>three.js canvas - particles - waves</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				background-color: #ffffff;
+				margin: 0px;
+				overflow: hidden;
+			}
+
+			a {
+				color:#0078ff;
+			}
+		</style>
+	</head>
+	<body>
+		<script src="js/three.js"></script>
+
+		<script src="js/Projector.js"></script>
+		<script src="js/CanvasRenderer.js"></script>
+
+
+		<script>
+
+			var SEPARATION = 300, AMOUNTX = 65, AMOUNTY = 35;
+
+			var container, stats;
+			var camera, scene, renderer;
+
+			var particles, particle, count = 0;
+
+			var mouseX = 0, mouseY = 0;
+
+			var windowHalfX = window.innerWidth / 2;
+			var windowHalfY = window.innerHeight / 2;
+
+			init();
+			animate();
+
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+
+				camera = new THREE.PerspectiveCamera( 100000, window.innerWidth / 400, 500, 5000 );
+				camera.position.z = 1000;
+
+				scene = new THREE.Scene();
+
+				particles = new Array();
+
+				var PI2 = Math.PI * 2;
+				var material = new THREE.SpriteCanvasMaterial( {
+
+					color: 0x000000,
+					program: function ( context ) {
+
+						context.beginPath();
+						context.arc( 0, 0, 3, 0, PI2, true );
+						context.fill();
+
+					}
+
+				} );
+
+				var i = 0;
+
+				for ( var ix = 0; ix < AMOUNTX; ix ++ ) {
+
+					for ( var iy = 0; iy < AMOUNTY; iy ++ ) {
+
+						particle = particles[ i ++ ] = new THREE.Sprite( material );
+						particle.position.x = ix * SEPARATION - ( ( AMOUNTX * SEPARATION ) / 0.1 );
+						particle.position.z = iy * SEPARATION - ( ( AMOUNTY * SEPARATION ) / 0.1 );
+						scene.add( particle );
+
+					}
+
+				}
+
+				renderer = new THREE.CanvasRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, 400 );
+				renderer.setClearColorHex( 0xffffff, 1 );
+				container.appendChild( renderer.domElement );
+
+				mouseX = 355;
+				mouseY = 54.5;
+				//document.addEventListener( 'mousemove', onDocumentMouseMove, false );
+				document.addEventListener( 'touchstart', onDocumentTouchStart, false );
+				document.addEventListener( 'touchmove', onDocumentTouchMove, false );
+
+				//
+
+				window.addEventListener( 'resize', onWindowResize, false );
+
+			}
+
+			function onWindowResize() {
+
+				windowHalfX = window.innerWidth / 2;
+				windowHalfY = window.innerHeight / 2;
+
+				camera.aspect = window.innerWidth / 400;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, 400 );
+
+			}
+
+			//
+
+			function onDocumentMouseMove( event ) {
+				console.log( mouseX, mouseY );
+
+				mouseX = event.clientX - windowHalfX;
+				mouseY = event.clientY - windowHalfY;
+
+			}
+
+			function onDocumentTouchStart( event ) {
+
+				if ( event.touches.length === 1 ) {
+
+					event.preventDefault();
+
+					mouseX = event.touches[ 0 ].pageX - windowHalfX;
+					mouseY = event.touches[ 0 ].pageY - windowHalfY;
+
+				}
+
+			}
+
+			function onDocumentTouchMove( event ) {
+
+				if ( event.touches.length === 1 ) {
+
+					event.preventDefault();
+
+					mouseX = event.touches[ 0 ].pageX - windowHalfX;
+					mouseY = event.touches[ 0 ].pageY - windowHalfY;
+
+				}
+
+			}
+
+			//
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				render();
+
+			}
+
+			function render() {
+
+				camera.position.x += ( mouseX - camera.position.x ) * .35;
+				camera.position.y += ( - mouseY - camera.position.y ) * .65;
+				camera.lookAt( scene.position );
+
+				var i = 0;
+
+				for ( var ix = 0; ix < AMOUNTX; ix ++ ) {
+
+					for ( var iy = 0; iy < AMOUNTY; iy ++ ) {
+
+						particle = particles[ i++ ];
+
+						particle.position.y = ( Math.sin( ( ix + count ) * 0.35 ) * 200 ) +
+							( Math.sin( ( iy + count ) * 0.1 ) * 900 );
+						particle.position.x = ( Math.sin( ( ix + count ) * 0.25 ) * 200 ) +
+							( Math.sin( ( iy + count ) * 0.25 ) * 800 );
+						particle.position.z = ( Math.sin( ( ix + count ) * 0.4 ) * 300 ) +
+							( Math.sin( ( iy + count ) * 0.3 ) * 700 );
+					}
+
+				}
+
+				renderer.render( scene, camera );
+
+				count += 0.02;
+
+			}
+
+		</script>
+	</body>
+</html>
